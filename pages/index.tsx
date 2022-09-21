@@ -1,8 +1,29 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useEffect, useState } from "react";
+import { getPosts } from "../api";
 import styles from "../styles/Home.module.scss";
 
 const Home: NextPage = () => {
+	const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+	const [posts, setPosts] = useState([]);
+
+	const fetchPosts = async () => {
+		setIsLoadingPosts(true);
+		try {
+			const res = await getPosts();
+			setPosts(res);
+			console.log(res);
+		} catch (e) {
+			console.log(e);
+		} finally {
+			setIsLoadingPosts(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchPosts();
+	}, []);
 	return (
 		<div>
 			<Head>
@@ -21,18 +42,26 @@ const Home: NextPage = () => {
 					</div>
 
 					<div>
-						{[1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => {
-							return (
-								<a href="https://nextjs.org/docs" className={styles.card} key={item}>
-									<p>Find in-depth information about Next.js features and API.</p>
+						{isLoadingPosts ? (
+							<p>Loading...</p>
+						) : (
+							posts.map((item) => {
+								const { id, body } = item;
+								return (
+									<a href="https://nextjs.org/docs" className={styles.card} key={item}>
+										<p className={styles.text}>{body}</p>
 
-									<div className={styles.btnWrapper}>
-										<button>Edit</button>
-										<button>Delete</button>
-									</div>
-								</a>
-							);
-						})}
+										<div className={styles.footer}>
+											<p>ID: {id}</p>
+											<div className={styles.btnWrapper}>
+												<button>Edit</button>
+												<button>Delete</button>
+											</div>
+										</div>
+									</a>
+								);
+							})
+						)}
 					</div>
 				</div>
 			</main>
