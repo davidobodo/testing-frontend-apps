@@ -24,6 +24,13 @@ const createPost = async (payload: TPost): Promise<TPost> => {
 
 const updatePost = async () => {};
 
-const deletePost = async () => {};
+const deletePost = async (id: number) => {
+	try {
+		const res = await axios.delete(`${BASE_URL}/posts/${id}`);
+		return res.data;
+	} catch (e) {
+		throw e;
+	}
+};
 
 export { getPosts, createPost, updatePost, deletePost };

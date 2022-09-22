@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { createPost, getPosts } from "../api";
+import { createPost, deletePost, getPosts, updatePost } from "../api";
 import styles from "../styles/Home.module.scss";
-
+import { Post } from "../components";
 export type TPost = {
 	title: string;
 	body: string;
@@ -41,7 +41,7 @@ const Home: NextPage = () => {
 	// CREATE POST
 	//----------------------------------------------------------
 	const [inputValue, setInputValue] = useState("");
-	const handleSubmit = async () => {
+	const handleCreatePost = async () => {
 		try {
 			const res = await createPost({
 				title: new Date().toString(),
@@ -53,10 +53,29 @@ const Home: NextPage = () => {
 			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
 			const updatedPosts = [res, ...clonedPosts];
 			setPosts(updatedPosts);
+			setInputValue("");
 		} catch (e) {
 			console.log(e);
 		}
 	};
+
+	//----------------------------------------------------------
+	// DELETE POST
+	//----------------------------------------------------------
+	const [isDeleting, setIsDeleting] = useState(false);
+	const handleDeletePost = async (id: number) => {
+		setIsDeleting(true);
+		try {
+			await deletePost(id);
+			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
+			const updatePosts = clonedPosts.filter((item) => item.id !== id);
+			setPosts(updatePosts);
+		} catch (e) {
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
 	return (
 		<div>
 			<Head>
@@ -76,7 +95,7 @@ const Home: NextPage = () => {
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 						/>
-						<button onClick={handleSubmit}>Submit</button>
+						<button onClick={handleCreatePost}>Submit</button>
 					</div>
 
 					<div>
@@ -85,19 +104,7 @@ const Home: NextPage = () => {
 						) : (
 							posts.map((item) => {
 								const { id, body } = item;
-								return (
-									<a href="https://nextjs.org/docs" className={styles.card} key={item}>
-										<p className={styles.text}>{body}</p>
-
-										<div className={styles.footer}>
-											<p>ID: {id}</p>
-											<div className={styles.btnWrapper}>
-												<button>Edit</button>
-												<button>Delete</button>
-											</div>
-										</div>
-									</a>
-								);
+								return <Post id={id} body={body} key={id} handleDeletePost={handleDeletePost} />;
 							})
 						)}
 					</div>
