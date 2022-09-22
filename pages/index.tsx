@@ -1,19 +1,31 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { getPosts } from "../api";
+import { createPost, getPosts } from "../api";
 import styles from "../styles/Home.module.scss";
 
+export type TPost = {
+	title: string;
+	body: string;
+	userId: number;
+	id: number;
+};
 const Home: NextPage = () => {
+	//----------------------------------------------------------
+	// GET POSTS
+	//----------------------------------------------------------
 	const [isLoadingPosts, setIsLoadingPosts] = useState(false);
-	const [posts, setPosts] = useState([]);
+	const [posts, setPosts] = useState<TPost[]>([]);
 
 	const fetchPosts = async () => {
 		setIsLoadingPosts(true);
 		try {
 			const res = await getPosts();
-			setPosts(res);
-			console.log(res);
+
+			const sorted = res.sort((a, b) => {
+				return b.id - a.id;
+			});
+			setPosts(sorted);
 		} catch (e) {
 			console.log(e);
 		} finally {
@@ -24,6 +36,27 @@ const Home: NextPage = () => {
 	useEffect(() => {
 		fetchPosts();
 	}, []);
+
+	//----------------------------------------------------------
+	// CREATE POST
+	//----------------------------------------------------------
+	const [inputValue, setInputValue] = useState("");
+	const handleSubmit = async () => {
+		try {
+			const res = await createPost({
+				title: new Date().toString(),
+				body: inputValue,
+				userId: 1,
+				id: posts.length + 1,
+			});
+
+			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
+			const updatedPosts = [res, ...clonedPosts];
+			setPosts(updatedPosts);
+		} catch (e) {
+			console.log(e);
+		}
+	};
 	return (
 		<div>
 			<Head>
@@ -37,8 +70,13 @@ const Home: NextPage = () => {
 
 				<div className={styles.feed}>
 					<div className={styles.status}>
-						<input type="text" placeholder="Whats on your mind?" />
-						<button>Submit</button>
+						<input
+							type="text"
+							placeholder="Whats on your mind?"
+							value={inputValue}
+							onChange={(e) => setInputValue(e.target.value)}
+						/>
+						<button onClick={handleSubmit}>Submit</button>
 					</div>
 
 					<div>
