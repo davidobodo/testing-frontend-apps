@@ -1,27 +1,9 @@
 import "@testing-library/jest-dom";
 import axios from "axios";
-import React, { ReactElement, ReactNode } from "react";
-import userEvent from "@testing-library/user-event";
-import { render, RenderOptions, screen, waitForElementToBeRemoved, within } from "@testing-library/react";
+import React from "react";
 import Home from "../pages/index";
 import { postsData } from "../data";
-
-//-------------------------------------
-//HELPERS
-//-------------------------------------
-const Wrapper = ({ children }: { children: ReactNode }) => {
-	return <div>{children}</div>;
-};
-
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">) =>
-	render(ui, { wrapper: Wrapper, ...options });
-
-const setupUserEvent = (jsx: JSX.Element) => {
-	return {
-		user: userEvent.setup(),
-		...customRender(jsx),
-	};
-};
+import { setupUserEvent, render, screen, waitForElementToBeRemoved, within } from "../utils/tests";
 
 describe("User", () => {
 	it("can see posts when they open the application", async () => {
@@ -76,20 +58,37 @@ describe("User", () => {
 		//Wait for loading text to be removed off the screen (i.e when our async called completes)
 		await waitForElementToBeRemoved(() => screen.queryByText("Loading..."));
 
+		//Get first post
 		const posts = screen.getAllByRole("article");
 		const firstPost = posts[0];
 
-		const btnEdit = within(firstPost).getByRole("button", { name: "Edit" });
+		//Click on edit button
+		const focusedElement = within(firstPost);
+		const btnEdit = focusedElement.getByRole("button", { name: "Edit" });
 
 		await user.click(btnEdit);
 
 		//Assert that buttons have changed
-		expect(within(firstPost).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
-		expect(within(firstPost).getByRole("button", { name: "Submit" })).toBeInTheDocument();
-		expect(within(firstPost).queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
-		expect(within(firstPost).queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+		expect(focusedElement.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+		expect(focusedElement.getByRole("button", { name: "Submit" })).toBeInTheDocument();
+		expect(focusedElement.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+		expect(focusedElement.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
 
-		await user.type();
+		const textareField = focusedElement.getByRole("textbox");
+		await user.type(textareField, "I am going");
+
+		//Assert that what user typed is added to the end of the existing text
+		expect(textareField).toHaveValue(postsData[99].body + "I am going");
+
+		const btnSubmit = focusedElement.getByRole("button", { name: "Submit" });
+
+		await user.click(btnSubmit);
+
+		//Assert that buttons have changed to default state
+		expect(focusedElement.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+		expect(focusedElement.queryByRole("button", { name: "Submit" })).not.toBeInTheDocument();
+		expect(focusedElement.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+		expect(focusedElement.getByRole("button", { name: "Delete" })).toBeInTheDocument();
 	});
 
 	it("can delete post", async () => {

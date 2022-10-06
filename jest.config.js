@@ -10,6 +10,9 @@ const customJestConfig = {
 	moduleDirectories: ["node_modules", "<rootDir>/"],
 	testEnvironment: "jest-environment-jsdom",
 	verbose: true,
+	moduleNameMapper: {
+		"\\.(css|scss)$": "identity-obj-proxy",
+	},
 };
 
 module.exports = createJestConfig(customJestConfig);
