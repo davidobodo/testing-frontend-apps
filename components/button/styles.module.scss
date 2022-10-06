@@ -1,0 +1,17 @@
+.button {
+	min-width: 80px;
+	padding: 5px;
+	border-radius: 2px;
+	border: 1px solid;
+	cursor: pointer;
+	transition: transform 200ms ease-in-out;
+
+	&:hover {
+		transform: translateY(-2px);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}

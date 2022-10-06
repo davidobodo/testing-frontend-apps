@@ -1,3 +1,4 @@
 import Post from "./post";
-
-export { Post };
+import Button from "./button";
+import ExpandableTextarea from "./expandable-textarea";
+export { Post, Button, ExpandableTextarea };

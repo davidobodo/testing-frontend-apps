@@ -5,6 +5,7 @@ const BASE_URL = `https://jsonplaceholder.typicode.com`;
 const getPosts = async (): Promise<TPost[]> => {
 	try {
 		const res = await axios.get(`${BASE_URL}/posts`);
+
 		return res.data.slice(90);
 	} catch (e) {
 		throw e;
@@ -22,7 +23,14 @@ const createPost = async (payload: TPost): Promise<TPost> => {
 	}
 };
 
-const updatePost = async () => {};
+const updatePost = async ({ body, id }: { body: string; id: number }) => {
+	try {
+		const res = await axios.put(`${BASE_URL}/posts/${id}`);
+		return res.data;
+	} catch (e) {
+		throw e;
+	}
+};
 
 const deletePost = async (id: number) => {
 	try {

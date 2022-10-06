@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import styles from "../styles/Home.module.scss";
 import { useEffect, useState } from "react";
 import { createPost, deletePost, getPosts, updatePost } from "../api";
-import styles from "../styles/Home.module.scss";
-import { Post } from "../components";
+import { Post, Button } from "../components";
 export type TPost = {
 	title: string;
 	body: string;
@@ -40,39 +40,85 @@ const Home: NextPage = () => {
 	//----------------------------------------------------------
 	// CREATE POST
 	//----------------------------------------------------------
+	const [isCreatingPost, setIsCreatingPost] = useState(false);
 	const [inputValue, setInputValue] = useState("");
 	const handleCreatePost = async () => {
+		if (inputValue.trim().length === 0) {
+			alert("Please enter some text");
+			return;
+		}
 		try {
-			const res = await createPost({
+			setIsCreatingPost(true);
+			await createPost({
 				title: new Date().toString(),
 				body: inputValue,
 				userId: 1,
 				id: posts.length + 1,
 			});
 
+			const newData = {
+				title: new Date().toString(),
+				body: inputValue,
+				userId: 1,
+				id: posts.length + 1,
+			};
+
 			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
-			const updatedPosts = [res, ...clonedPosts];
+			const updatedPosts = [newData, ...clonedPosts];
 			setPosts(updatedPosts);
 			setInputValue("");
 		} catch (e) {
 			console.log(e);
+		} finally {
+			setIsCreatingPost(false);
 		}
 	};
 
 	//----------------------------------------------------------
 	// DELETE POST
 	//----------------------------------------------------------
-	const [isDeleting, setIsDeleting] = useState(false);
+	const [idToDelete, setIdToDelete] = useState<number | undefined>();
 	const handleDeletePost = async (id: number) => {
-		setIsDeleting(true);
+		setIdToDelete(id);
 		try {
 			await deletePost(id);
 			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
 			const updatePosts = clonedPosts.filter((item) => item.id !== id);
 			setPosts(updatePosts);
 		} catch (e) {
+			console.log(e);
 		} finally {
-			setIsDeleting(false);
+			setIdToDelete(undefined);
+		}
+	};
+
+	//----------------------------------------------------------
+	// EDIT POST
+	//----------------------------------------------------------
+	const handleEditPost = async (payload: { body: string; id: number }) => {
+		const { id, body } = payload;
+		try {
+			await updatePost(payload);
+
+			const clonedPosts: TPost[] = JSON.parse(JSON.stringify(posts));
+
+			//get edited post
+			let editedPostIndex;
+			const editedPost = clonedPosts.find((item, i) => {
+				if (item.id === id) {
+					editedPostIndex = i;
+				}
+				return item.id === id;
+			});
+
+			if (editedPost && typeof editedPostIndex !== "undefined") {
+				editedPost.body = body;
+				clonedPosts.splice(editedPostIndex, 1, editedPost);
+				setPosts(clonedPosts);
+			}
+		} catch (e) {
+			console.log(e);
+		} finally {
 		}
 	};
 
@@ -95,16 +141,27 @@ const Home: NextPage = () => {
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 						/>
-						<button onClick={handleCreatePost}>Submit</button>
+						<Button onClick={handleCreatePost} isDisabled={inputValue.trim().length === 0 || isCreatingPost}>
+							{isCreatingPost ? "Posting..." : "Post"}
+						</Button>
 					</div>
 
 					<div>
 						{isLoadingPosts ? (
-							<p>Loading...</p>
+							<p className={styles.loading}>Loading...</p>
 						) : (
 							posts.map((item) => {
 								const { id, body } = item;
-								return <Post id={id} body={body} key={id} handleDeletePost={handleDeletePost} />;
+								return (
+									<Post
+										id={id}
+										body={body}
+										key={id}
+										handleDeletePost={handleDeletePost}
+										handleEditPost={handleEditPost}
+										isDeleting={id === idToDelete}
+									/>
+								);
 							})
 						)}
 					</div>
