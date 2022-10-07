@@ -7,6 +7,7 @@ import { setupUserEvent, render, screen, waitForElementToBeRemoved, within } fro
 
 describe("User", () => {
 	it("can see posts when they open the application", async () => {
+		// USER SEES TEXT AREA AND POST HEADER
 		//Set a custom reponse for our request
 		axios.get.mockResolvedValue({ data: postsData });
 
