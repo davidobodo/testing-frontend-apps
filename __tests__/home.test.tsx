@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom";
+// import "@testing-library/jest-dom";
 import axios from "axios";
 import React from "react";
 import Home from "../pages/index";
@@ -7,12 +7,17 @@ import { setupUserEvent, render, screen, waitForElementToBeRemoved, within } fro
 
 describe("User", () => {
 	it("can see posts when they open the application", async () => {
-		// USER SEES TEXT AREA AND POST HEADER
 		//Set a custom reponse for our request
 		axios.get.mockResolvedValue({ data: postsData });
 
 		//Render a component (Since user would not be executing any actio, we don't need to setup events)
 		render(<Home />);
+
+		//Assert that user can see Post Feed heading
+		expect(screen.getByText("Post Feed")).toBeInTheDocument();
+
+		//Assert that user can see an input
+		expect(screen.getByRole("textbox", { name: /post/ })).toBeInTheDocument();
 
 		//Assert that loading text is on the screen
 		expect(screen.getByText("Loading...")).toBeInTheDocument();
