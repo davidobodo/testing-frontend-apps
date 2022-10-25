@@ -65,7 +65,7 @@ export default function Post({ id, body, handleDeletePost, handleEditPost, isDel
 			textareaRef.current.focus();
 			textareaRef.current.setSelectionRange(body.length, body.length);
 		}
-	}, [inEditMode]);
+	}, [inEditMode, body.length]);
 
 	return (
 		<article className={styles.card}>

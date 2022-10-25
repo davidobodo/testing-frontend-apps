@@ -22,9 +22,18 @@ const Home: NextPage = () => {
 		try {
 			const res = await getPosts();
 
-			const sorted = res.sort((a, b) => {
-				return b.id - a.id;
-			});
+			const sorted = res
+				.map((item, i) => {
+					//Change the id of each post
+					return {
+						...item,
+						id: i + 1,
+					};
+				})
+				.sort((a, b) => {
+					//Sort posts by id
+					return b.id - a.id;
+				});
 			setPosts(sorted);
 		} catch (e) {
 			console.log(e);
@@ -140,6 +149,7 @@ const Home: NextPage = () => {
 							placeholder="Whats on your mind?"
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
+							aria-label="post"
 						/>
 						<Button onClick={handleCreatePost} isDisabled={inputValue.trim().length === 0 || isCreatingPost}>
 							{isCreatingPost ? "Posting..." : "Post"}
