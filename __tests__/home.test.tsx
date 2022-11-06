@@ -1,6 +1,4 @@
-// import "@testing-library/jest-dom";
 import axios from "axios";
-import React from "react";
 import Home from "../pages/index";
 import { postsData } from "../data";
 import { setupUserEvent, render, screen, waitForElementToBeRemoved, within } from "../utils/tests";
@@ -27,7 +25,6 @@ describe("User", () => {
 
 		//Assert that a network request was made which was called once and with a certain url
 		expect(axios.get).toBeCalledTimes(1);
-		// expect(axios.get).toBeCalledWith(`https://jsonplaceholder.typicode.com/posts`);
 
 		//Assert that user can see 10 posts by default on the users screen
 		const posts = screen.getAllByRole("article");
@@ -35,8 +32,6 @@ describe("User", () => {
 	});
 
 	it("can create post successfully", async () => {
-		axios.post.mockResolvedValueOnce({ data: [] });
-
 		const { user } = setupUserEvent(<Home />);
 
 		//Get input field
@@ -90,6 +85,8 @@ describe("User", () => {
 
 		await user.click(btnSubmit);
 
+		expect(axios.put).toBeCalledTimes(1);
+
 		//Assert that buttons have changed to default state
 		expect(focusedElement.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
 		expect(focusedElement.queryByRole("button", { name: "Submit" })).not.toBeInTheDocument();
@@ -109,6 +106,8 @@ describe("User", () => {
 		const btnDelete = within(firstPost).getByRole("button", { name: "Delete" });
 
 		await user.click(btnDelete);
+
+		expect(axios.delete).toBeCalledTimes(1);
 
 		const remainingPosts = screen.getAllByRole("article");
 		expect(remainingPosts).toHaveLength(9);
