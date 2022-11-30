@@ -4,7 +4,7 @@ import { postsData } from "../data";
 import { setupUserEvent, render, screen, waitForElementToBeRemoved, within } from "../utils/tests";
 
 describe("User", () => {
-	it("can see posts when they open the application", async () => {
+	it("can see posts when they open the application.", async () => {
 		//Set a custom reponse for our request
 		axios.get.mockResolvedValue({ data: postsData });
 

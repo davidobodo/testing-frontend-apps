@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`About page Should render with correct details 1`] = `
+exports[`About page Should render with correct details. 1`] = `
 <DocumentFragment>
   <main
     class="main"
